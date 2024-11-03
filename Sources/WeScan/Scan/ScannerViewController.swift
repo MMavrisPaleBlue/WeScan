@@ -28,6 +28,18 @@ public final class ScannerViewController: UIViewController {
     /// The original bar style that was set by the host app
     private var originalBarStyle: UIBarStyle?
 
+    private var style: WeScanStyle?
+
+    public init(style: WeScanStyle?) {
+        self.style = style
+        super.init(nibName: nil, bundle: nil) // Call the superclass initializer
+    }
+
+    // Required initializer for UIViewController subclasses
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     private lazy var shutterButton: ShutterButton = {
         let button = ShutterButton()
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -46,7 +58,7 @@ public final class ScannerViewController: UIViewController {
     private lazy var autoScanButton: UIBarButtonItem = {
         let title = NSLocalizedString("wescan.scanning.auto", tableName: nil, bundle: Bundle(for: ScannerViewController.self), value: "Auto", comment: "The auto button state")
         let button = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(toggleAutoScan))
-        button.tintColor = .white
+        button.tintColor = style?.tintColor ?? .white
 
         return button
     }()
@@ -54,7 +66,7 @@ public final class ScannerViewController: UIViewController {
     private lazy var flashButton: UIBarButtonItem = {
         let image = UIImage(systemName: "bolt.fill", named: "flash", in: Bundle(for: ScannerViewController.self), compatibleWith: nil)
         let button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(toggleFlash))
-        button.tintColor = .white
+        button.tintColor = style?.tintColor ?? .white
 
         return button
     }()
@@ -65,6 +77,8 @@ public final class ScannerViewController: UIViewController {
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         return activityIndicator
     }()
+
+
 
     // MARK: - Life Cycle
 
@@ -291,7 +305,7 @@ extension ScannerViewController: RectangleDetectionDelegateProtocol {
     func captureSessionManager(_ captureSessionManager: CaptureSessionManager, didCapturePicture picture: UIImage, withQuad quad: Quadrilateral?) {
         activityIndicator.stopAnimating()
 
-        let editVC = EditScanViewController(image: picture, quad: quad)
+        let editVC = EditScanViewController(image: picture, quad: quad, style: self.style)
         navigationController?.pushViewController(editVC, animated: false)
 
         shutterButton.isUserInteractionEnabled = true

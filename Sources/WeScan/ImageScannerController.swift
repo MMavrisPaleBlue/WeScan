@@ -35,15 +35,26 @@ public protocol ImageScannerControllerDelegate: NSObjectProtocol {
     func imageScannerController(_ scanner: ImageScannerController, didFailWithError error: Error)
 }
 
+public struct WeScanStyle {
+    var tabColor: UIColor
+    var tintColor: UIColor
+
+    public init(tabColor: UIColor, tintColor: UIColor) {
+        self.tabColor = tabColor
+        self.tintColor = tintColor
+    }
+}
+
 /// A view controller that manages the full flow for scanning documents.
 /// The `ImageScannerController` class is meant to be presented. It consists of a series of 3 different screens which guide the user:
 /// 1. Uses the camera to capture an image with a rectangle that has been detected.
 /// 2. Edit the detected rectangle.
 /// 3. Review the cropped down version of the rectangle.
 public final class ImageScannerController: UINavigationController {
-
     /// The object that acts as the delegate of the `ImageScannerController`.
     public weak var imageScannerDelegate: ImageScannerControllerDelegate?
+
+    private var style: WeScanStyle?
 
     // MARK: - Life Cycle
 
@@ -60,10 +71,11 @@ public final class ImageScannerController: UINavigationController {
         return .portrait
     }
 
-    public required init(image: UIImage? = nil, delegate: ImageScannerControllerDelegate? = nil) {
-        super.init(rootViewController: ScannerViewController())
+    public required init(image: UIImage? = nil, style: WeScanStyle?, delegate: ImageScannerControllerDelegate? = nil) {
+        super.init(rootViewController: ScannerViewController(style: style))
 
         self.imageScannerDelegate = delegate
+        self.style = style
 
         if #available(iOS 13.0, *) {
             navigationBar.tintColor = .label
@@ -71,6 +83,12 @@ public final class ImageScannerController: UINavigationController {
             navigationBar.tintColor = .black
         }
         navigationBar.isTranslucent = false
+
+        if let style {
+            navigationBar.backgroundColor = style.tabColor
+            navigationBar.tintColor = style.tintColor
+        }
+
         self.view.addSubview(blackFlashView)
         setupConstraints()
 
@@ -78,7 +96,7 @@ public final class ImageScannerController: UINavigationController {
         if let image {
             detect(image: image) { [weak self] detectedQuad in
                 guard let self else { return }
-                let editViewController = EditScanViewController(image: image, quad: detectedQuad, rotateImage: false)
+                let editViewController = EditScanViewController(image: image, quad: detectedQuad, rotateImage: false, style: self.style)
                 self.setViewControllers([editViewController], animated: false)
             }
         }
@@ -119,13 +137,13 @@ public final class ImageScannerController: UINavigationController {
 
         detect(image: image) { [weak self] detectedQuad in
             guard let self else { return }
-            let editViewController = EditScanViewController(image: image, quad: detectedQuad, rotateImage: false)
+            let editViewController = EditScanViewController(image: image, quad: detectedQuad, rotateImage: false, style: self.style)
             self.setViewControllers([editViewController], animated: true)
         }
     }
 
     public func resetScanner() {
-        setViewControllers([ScannerViewController()], animated: true)
+        setViewControllers([ScannerViewController(style: self.style)], animated: true)
     }
 
     private func setupConstraints() {

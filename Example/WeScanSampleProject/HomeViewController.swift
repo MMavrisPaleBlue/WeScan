@@ -134,7 +134,10 @@ final class HomeViewController: UIViewController {
     }
 
     func scanImage() {
-        let scannerViewController = ImageScannerController(delegate: self)
+        let scannerViewController = ImageScannerController(
+            style: WeScanStyle(tabColor: .white, tintColor: .black),
+            delegate: self
+        )
         scannerViewController.modalPresentationStyle = .fullScreen
 
         if #available(iOS 13.0, *) {
@@ -177,10 +180,10 @@ extension HomeViewController: UIImagePickerControllerDelegate, UINavigationContr
 
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        picker.dismiss(animated: true)
-
-        guard let image = info[.originalImage] as? UIImage else { return }
-        let scannerViewController = ImageScannerController(image: image, delegate: self)
-        present(scannerViewController, animated: true)
+//        picker.dismiss(animated: true)
+//
+//        guard let image = info[.originalImage] as? UIImage else { return }
+//        let scannerViewController = ImageScannerController(image: image, style: <#ImageScannerController.Style?#>, delegate: self)
+//        present(scannerViewController, animated: true)
     }
 }

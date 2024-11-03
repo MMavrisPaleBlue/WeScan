@@ -38,7 +38,7 @@ final class EditScanViewController: UIViewController {
                                       comment: "A generic next button"
         )
         let button = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(pushReviewController))
-        button.tintColor = navigationController?.navigationBar.tintColor
+        button.tintColor = style?.tintColor ?? navigationController?.navigationBar.tintColor
         return button
     }()
 
@@ -50,7 +50,7 @@ final class EditScanViewController: UIViewController {
                                       comment: "A generic cancel button"
         )
         let button = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(cancelButtonTapped))
-        button.tintColor = navigationController?.navigationBar.tintColor
+        button.tintColor = style?.tintColor ?? navigationController?.navigationBar.tintColor
         return button
     }()
 
@@ -65,11 +65,14 @@ final class EditScanViewController: UIViewController {
     private var quadViewWidthConstraint = NSLayoutConstraint()
     private var quadViewHeightConstraint = NSLayoutConstraint()
 
+    private var style: WeScanStyle?
+
     // MARK: - Life Cycle
 
-    init(image: UIImage, quad: Quadrilateral?, rotateImage: Bool = true) {
+    init(image: UIImage, quad: Quadrilateral?, rotateImage: Bool = true, style: WeScanStyle?) {
         self.image = rotateImage ? image.applyingPortraitOrientation() : image
         self.quad = quad ?? EditScanViewController.defaultQuad(forImage: image)
+        self.style = style
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -81,6 +84,13 @@ final class EditScanViewController: UIViewController {
         super.viewDidLoad()
 
         setupViews()
+
+        self.navigationController?.navigationBar.tintColor = style?.tintColor ?? .black
+
+        self.navigationController?.navigationBar.titleTextAttributes = [
+            .foregroundColor: style?.tintColor ?? .black
+        ]
+
         setupConstraints()
         title = NSLocalizedString("wescan.edit.title",
                                   tableName: nil,
